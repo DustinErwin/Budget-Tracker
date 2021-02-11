@@ -176,7 +176,7 @@ function saveRecord(transaction) {
 
     request.onsuccess = (e) => {
       const db = request.result;
-      const update = db.update(["budget"], "readwrite");
+      const update = db.transaction(["budget"], "readwrite");
       const transactionStore = update.objectStore("budget");
 
       // Adds data to our objectStore
