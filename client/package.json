@@ -1,5 +1,5 @@
 {
-  "name": "solved",
+  "name": "client-budget-tracker",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -17,5 +17,12 @@
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12",
     "webpack-pwa-manifest": "^4.3.0"
+  },
+  "dependencies": {
+    "mongodb": "^3.6.4",
+    "mongojs": "^3.1.0",
+    "mongoose": "^5.11.15",
+    "node-fetch": "^2.6.1",
+    "typescript": "^4.1.3"
   }
 }

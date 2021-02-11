@@ -3,9 +3,9 @@ const path = require("path");
 
 const config = {
   mode: "development",
-  entry: "./index.js",
+  entry: __dirname + "/index.js",
   output: {
-    path: __dirname + "./dist",
+    path: __dirname + "/dist",
     filename: "bundle.js",
   },
   module: {
@@ -24,9 +24,9 @@ const config = {
   },
   plugins: [
     new WebpackPwaManifest({
-      name: "Images App",
-      short_name: "Images App",
-      description: "An application for images",
+      name: "Budget Tracker",
+      short_name: "Budget Tracker",
+      description: "An application for tracking a budget both on and offline.",
       background_color: "#01579b",
       theme_color: "#ffffff",
       "theme-color": "#ffffff",
