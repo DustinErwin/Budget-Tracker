@@ -1,6 +1,34 @@
 let transactions = [];
 let myChart;
 
+window.addEventListener("online", function () {
+  // const request = window.indexedDB.open("budget", 1);
+  const transaction = db.transaction(["budget"]);
+  const objectStore = transaction.objectStore("budget");
+  const request = objectStore.getAll();
+  request.onerror = function (event) {
+    console.log("Unable to retrieve from IDB", event);
+  };
+  request.onsuccess = function (event) {
+    fetch("/api/transaction/bulk", {
+      method: "POST",
+      body: request,
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+      },
+    });
+    const requestDelete = db
+      .transaction(["budget"], "readwrite")
+      .objectStore("budget")
+      .deleteDatabase("budget");
+    requestDelete.onsuccess = function (event) {
+      console.log("Database removed!");
+    };
+    console.log("Sent to MDB", event);
+  };
+});
+
 function serviceWorker() {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
@@ -167,14 +195,8 @@ document.querySelector("#sub-btn").onclick = function () {
 function saveRecord(transaction) {
   const request = window.indexedDB.open("budget", 1);
 
-  request.onupgradeneeded = ({ target }) => {
-    const db = target.result;
-
-    const objectStore = db.createObjectStore("budget", {
-      keyPath: "name",
-    });
-
-    request.onsuccess = (e) => {
+  request.onupgradeneeded = () => {
+    request.onsuccess = () => {
       const db = request.result;
       const update = db.transaction(["budget"], "readwrite");
       const transactionStore = update.objectStore("budget");
