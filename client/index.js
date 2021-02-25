@@ -2,8 +2,8 @@ let transactions = [];
 let myChart;
 
 window.addEventListener("online", function () {
-  // const request = window.indexedDB.open("budget", 1);
-  const transaction = db.transaction(["budget"]);
+  const db = window.indexedDB.open("budget", 1);
+  const transaction = db.result.transaction(["budget"], "readonly");
   const objectStore = transaction.objectStore("budget");
   const request = objectStore.getAll();
   request.onerror = function (event) {
@@ -177,7 +177,6 @@ function sendTransaction(isAdding) {
     .catch((err) => {
       // fetch failed, so save in indexed db
       saveRecord(transaction);
-
       // clear form
       nameEl.value = "";
       amountEl.value = "";
@@ -193,19 +192,34 @@ document.querySelector("#sub-btn").onclick = function () {
 };
 
 function saveRecord(transaction) {
-  const request = window.indexedDB.open("budget", 1);
+  let open = window.indexedDB.open("budget", 1);
 
-  request.onupgradeneeded = () => {
-    request.onsuccess = () => {
-      const db = request.result;
-      const update = db.transaction(["budget"], "readwrite");
-      const transactionStore = update.objectStore("budget");
+  open.onupgradeneeded = function (event) {
+    const db = event.target.result;
+    db.onerror = function (event) {
+      console.log("Error loading database", event);
+    };
 
-      // Adds data to our objectStore
-      transactionStore.add({
-        name: transaction.name,
-        value: transaction.value,
-      });
+    const objectStore = db.createObjectStore("budget", { keyPath: "name" });
+
+    objectStore.createIndex("name", "name", { unique: false });
+    objectStore.createIndex("value", "value", { unique: false });
+
+    console.log("Objectstore created");
+  };
+
+  open.onsuccess = function (event) {
+    db = open.result;
+    const tx = db.transaction(["budget"], "readwrite");
+
+    const store = tx.objectStore("budget");
+    const storeRequest = store.add({
+      name: transaction.name,
+      value: transaction.value,
+    });
+
+    storeRequest.onsuccess = function (event) {
+      console.log("Store request successful", event);
     };
   };
 }
