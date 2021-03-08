@@ -2,30 +2,34 @@ let transactions = [];
 let myChart;
 
 window.addEventListener("online", function () {
-  const db = window.indexedDB.open("budget", 1);
-  const transaction = db.result.transaction(["budget"], "readonly");
-  const objectStore = transaction.objectStore("budget");
-  const request = objectStore.getAll();
-  request.onerror = function (event) {
-    console.log("Unable to retrieve from IDB", event);
-  };
-  request.onsuccess = function (event) {
-    fetch("/api/transaction/bulk", {
-      method: "POST",
-      body: request,
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-      },
-    });
-    const requestDelete = db
-      .transaction(["budget"], "readwrite")
-      .objectStore("budget")
-      .deleteDatabase("budget");
-    requestDelete.onsuccess = function (event) {
-      console.log("Database removed!");
+  const dbOpenRequest = window.indexedDB.open("budget", 1);
+  dbOpenRequest.onsuccess = function () {
+    const db = dbOpenRequest.result;
+    const tx = db.transaction(["budget"]);
+    const objectStore = tx.objectStore("budget");
+    const request = objectStore.getAll();
+    request.onerror = function (event) {
+      console.log("Unable to retrieve from IDB", event);
     };
-    console.log("Sent to MDB", event);
+    request.onsuccess = function (event) {
+      console.log(request.result);
+      fetch("/api/transaction/bulk", {
+        method: "POST",
+        body: JSON.stringify(request.result),
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json",
+        },
+      });
+      const requestDelete = db
+        .transaction(["budget"], "readwrite")
+        .objectStore("budget")
+        .clear();
+      requestDelete.onsuccess = function (event) {
+        console.log("Database removed!");
+      };
+      console.log("Sent to MDB", event);
+    };
   };
 });
 
@@ -209,17 +213,12 @@ function saveRecord(transaction) {
   };
 
   open.onsuccess = function (event) {
-    db = open.result;
+    const db = event.target.result;
     const tx = db.transaction(["budget"], "readwrite");
 
-    const store = tx.objectStore("budget");
-    const storeRequest = store.add({
+    tx.objectStore("budget").add({
       name: transaction.name,
       value: transaction.value,
     });
-
-    storeRequest.onsuccess = function (event) {
-      console.log("Store request successful", event);
-    };
   };
 }
