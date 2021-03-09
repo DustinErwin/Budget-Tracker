@@ -7,7 +7,7 @@
     "start": "if-env NODE_ENV=production && npm run start:prod || npm run start:dev",
     "start:prod": "npm run build && node server.js",
     "start:dev": "concurrently \"npm run server\" \"cd client && npm run start\"",
-    "server": "nodemon server.js --ignore client",
+    "server": "node server.js --ignore client",
     "build": "cd client && npm run build",
     "install": "cd client && npm install",
     "client": "cd client && npm start",
@@ -25,12 +25,13 @@
   "homepage": "https://github.com/coding-boot-camp/unit18hw#readme",
   "dependencies": {
     "compression": "^1.7.4",
+    "concurrently": "^6.0.0",
     "express": "^4.17.1",
+    "if-env": "^1.0.4",
     "lite-server": "^2.5.3",
     "mongoose": "^5.5.15",
     "morgan": "^1.9.1",
-    "webpack-cli": "^4.5.0",
-    "if-env": "^1.0.4",
-    "webpack": "^5.21.1"
+    "webpack": "^5.21.1",
+    "webpack-cli": "^4.5.0"
   }
 }
